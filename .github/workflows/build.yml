@@ -20,7 +20,8 @@ jobs:
       run: |
         xcodebuild -resolvePackageDependencies \
                    -project DynamicNotch.xcodeproj \
-                   -scheme DynamicNotch
+                   -scheme DynamicNotch \
+                   -clonedSourcePackagesDirPath SourcePackages
 
     - name: Build App for macOS Ventura (Intel & Apple Silicon)
       run: |
@@ -28,12 +29,13 @@ jobs:
                    -scheme DynamicNotch \
                    -configuration Release \
                    -arch x86_64 -arch arm64 \
+                   -clonedSourcePackagesDirPath SourcePackages \
                    MACOSX_DEPLOYMENT_TARGET=13.0 \
                    CODE_SIGN_IDENTITY="" \
                    CODE_SIGNING_REQUIRED=NO \
                    CODE_SIGNING_ALLOWED=NO \
                    BUILD_DIR=build \
-                   clean build
+                   build
 
     - name: Zip Built App
       run: |
