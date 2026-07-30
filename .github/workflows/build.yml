@@ -1,0 +1,44 @@
+name: Build DynamicNotch for Ventura Intel
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Check Xcode Version
+      run: xcodebuild -version
+
+    - name: Build App for macOS Ventura (Intel & Apple Silicon)
+      run: |
+        xcodebuild -project DynamicNotch.xcodeproj \
+                   -scheme DynamicNotch \
+                   -configuration Release \
+                   -arch x86_64 -arch arm64 \
+                   MACOSX_DEPLOYMENT_TARGET=13.0 \
+                   CODE_SIGN_IDENTITY="" \
+                   CODE_SIGNING_REQUIRED=NO \
+                   CODE_SIGNING_ALLOWED=NO \
+                   BUILD_DIR=build \
+                   clean build
+
+    - name: Zip Built App
+      run: |
+        APP_PATH=$(find build -name "DynamicNotch.app" -type d | head -n 1)
+        cd "$(dirname "$APP_PATH")"
+        zip -r DynamicNotch-macOS-Universal.zip DynamicNotch.app
+        # Đưa file zip ra thư mục gốc để upload artifact dễ dàng
+        mv DynamicNotch-macOS-Universal.zip $GITHUB_WORKSPACE/
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: DynamicNotch-Ventura-Intel
+        path: DynamicNotch-macOS-Universal.zip
