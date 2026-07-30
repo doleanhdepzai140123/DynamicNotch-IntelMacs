@@ -16,6 +16,12 @@ jobs:
     - name: Check Xcode Version
       run: xcodebuild -version
 
+    - name: Resolve Swift Package Dependencies
+      run: |
+        xcodebuild -resolvePackageDependencies \
+                   -project DynamicNotch.xcodeproj \
+                   -scheme DynamicNotch
+
     - name: Build App for macOS Ventura (Intel & Apple Silicon)
       run: |
         xcodebuild -project DynamicNotch.xcodeproj \
@@ -32,9 +38,12 @@ jobs:
     - name: Zip Built App
       run: |
         APP_PATH=$(find build -name "DynamicNotch.app" -type d | head -n 1)
+        if [ -z "$APP_PATH" ]; then
+          echo "Error: DynamicNotch.app not found!"
+          exit 1
+        fi
         cd "$(dirname "$APP_PATH")"
         zip -r DynamicNotch-macOS-Universal.zip DynamicNotch.app
-        # Đưa file zip ra thư mục gốc để upload artifact dễ dàng
         mv DynamicNotch-macOS-Universal.zip $GITHUB_WORKSPACE/
 
     - name: Upload Build Artifact
